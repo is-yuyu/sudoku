@@ -1,0 +1,100 @@
+#启发式函数，使用曼哈顿距离
+FUNCTION manhatten_distance(state):
+    distance=0
+    for 每个格子(i,j) in state:
+        if 格子非空：
+            distance+=abs(i-target_x)+abs(j-target_y) #目标位置(target_x,target_y)
+    return distance
+
+#拼图节点类
+CLASS PuzzleNode:
+    state:当前拼图状态（4*4矩阵）
+    parent:父节点
+    move:到达此节点的移动(被移动的数字）
+    g:从起点到当前节点的实际步骤
+    h:启发式估计值
+    f:g+h
+
+    METHOD __init__(state,parent,move,g):
+        初始化各属性
+
+    METHOD get_blank_pos:
+        return 空白格(0)的位置
+
+    METHOD get_children():
+        children=[]
+        (x,y)=get_blank_pos()
+        for 每个可能的移动方向：
+            计算新位置(new_x,new_y)
+            if 新位置有效：
+                创建新状态 new_state=deepcopy(当前状态)
+                交换空白格与相邻数字
+                更新new_state并加入children
+        return children
+
+    METHOD get_solution():
+        从当前节点回溯到根节点，收集移动序列
+        return 反转后的移动序列
+
+#A*算法
+FUNCTION A_star(puzzle):
+    start_node=创建初始节点(puzzle)
+    open_set=最小优先队列（按f值排序）
+    closed_set=空集合
+
+    将start_node加入open_set
+
+    while !open_set:
+        current=从open_set中取出的最小节点（f值）
+        if current是目标状态:
+            return current.get_solution()
+
+        if current的状态字符串在close_set中:
+            continue
+
+        将current的状态字符串加入closed_set
+        for child in current.get_children():
+            将child加入open_set
+
+    return None #无解
+
+#IDA*算法
+FUNCTION IDA——star(puzzle):
+    start_node = 创建初始节点(puzzle)
+    bound = start_node的启发值h
+    path = [start_node]  # 当前路径
+
+    while True:
+        result = 深度受限搜索(path, 0, bound)
+
+        if result == "FOUND":
+            return path末尾节点的解
+
+        if result == 无穷大:
+            return None  # 无解
+
+        bound = result  # 更新bound
+
+FUNTION depth_limit_search(path,g,bound):  #辅助函数：深度受限搜索
+    node=path[-1]
+    f=g+node的启发值h
+
+    if f>bound:
+        return f
+
+    if node是目标状态:
+        return "FOUND"
+
+    min_cost=无穷大
+    for child in node.get_children():
+        if child不在path中：
+            将child加入path
+            t=depth_limited_search(path, g+1, bound)
+            if t=="FOUND":
+                return "FOUND"
+
+            if t<min_cost:
+                min_cost=t
+
+            从path移除child
+    return min_cost
